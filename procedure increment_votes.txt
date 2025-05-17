@@ -1,0 +1,32 @@
+DELIMITER //
+
+CREATE PROCEDURE increment_votes(
+    IN voter VARCHAR(50),
+    IN candidate VARCHAR(50)
+)
+BEGIN
+    DECLARE vote_status VARCHAR(20);
+
+    -- Get the voter's vote status
+    SELECT vote_status INTO vote_status
+    FROM voter
+    WHERE username = voter;
+
+    -- Check if already voted
+    IF vote_status = 'casted' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'You have already voted';
+    ELSE
+        -- Increment candidate's vote count
+        UPDATE candidate
+        SET vtes = vtes + 1
+        WHERE username = candidate;
+
+        -- Update voter's vote status
+        UPDATE voter
+        SET vote_status = 'casted'
+        WHERE username = voter;
+    END IF;
+END //
+
+DELIMITER ;

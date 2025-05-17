@@ -1,0 +1,76 @@
+-- creating databse
+create database voting_system;
+
+--creating tables
+CREATE TABLE politicalparty (
+    par_id INT NOT NULL PRIMARY KEY,
+    p_name VARCHAR(50) UNIQUE
+);
+
+CREATE TABLE area (
+    a_id INT NOT NULL PRIMARY KEY,
+    a_name VARCHAR(50),
+    co_id INT
+);
+
+CREATE TABLE constituency (
+    co_id INT NOT NULL PRIMARY KEY,
+    co_num VARCHAR(7) UNIQUE,
+    aid INT NOT NULL
+);
+
+CREATE TABLE candidate (
+    cid INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(256) NOT NULL,
+    Age INT NOT NULL,
+    qualification VARCHAR(15) NOT NULL,
+    par_id INT NOT NULL,
+    co_id INT NOT NULL,
+    vtes INT NOT NULL DEFAULT 0,
+    first_name VARCHAR(20) NOT NULL,
+    last_name VARCHAR(20) NOT NULL,
+    menifesto VARCHAR(90) NOT NULL,
+    gender CHAR(1),
+    cnic VARCHAR(20) NOT NULL,
+    reg_date DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE residing_officer (
+    aid INT NOT NULL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    password_hash VARCHAR(256) NOT NULL,
+    first_name VARCHAR(20) NOT NULL,
+    last_name VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE voter (
+    vid INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(256) NOT NULL,
+    Age INT NOT NULL,
+    co_id INT NOT NULL,
+    cnic VARCHAR(20) UNIQUE,
+    first_name VARCHAR(20) NOT NULL,
+    last_name VARCHAR(20) NOT NULL,
+    gender CHAR(1),
+    vote_status VARCHAR(15) DEFAULT 'not casted',
+    reg_date DATETIME
+);
+
+-- adding foreign key constraints
+ALTER TABLE area
+    ADD CONSTRAINT fk_area_co_id FOREIGN KEY (co_id) REFERENCES constituency(co_id);
+
+ALTER TABLE constituency
+    ADD CONSTRAINT fk_constituency_aid FOREIGN KEY (aid) REFERENCES area(a_id);
+
+ALTER TABLE candidate
+    ADD CONSTRAINT fk_candidate_par_id FOREIGN KEY (par_id) REFERENCES politicalparty(par_id),
+    ADD CONSTRAINT fk_candidate_co_id FOREIGN KEY (co_id) REFERENCES constituency(co_id);
+
+ALTER TABLE residing_officer
+    ADD CONSTRAINT fk_residing_officer_aid FOREIGN KEY (aid) REFERENCES area(a_id);
+
+ALTER TABLE voter
+    ADD CONSTRAINT fk_voter_co_id FOREIGN KEY (co_id) REFERENCES constituency(co_id);

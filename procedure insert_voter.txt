@@ -1,0 +1,36 @@
+DELIMITER //
+
+CREATE PROCEDURE insert_voter(
+    IN p_username VARCHAR(50),
+    IN p_password VARCHAR(256),
+    IN p_age INT,
+    IN p_cnic VARCHAR(20),
+    IN p_first_name VARCHAR(20),
+    IN p_last_name VARCHAR(20),
+    IN p_gender CHAR(1),
+    IN p_a_name VARCHAR(50)
+)
+BEGIN
+    DECLARE v_constituency_id INT;
+    DECLARE v_hashed_password VARCHAR(256);
+
+    -- Hash the password
+    SET v_hashed_password = SHA2(p_password, 256);
+
+    -- Get constituency ID based on area name
+    SELECT co_id INTO v_constituency_id
+    FROM area
+    WHERE a_name = p_a_name;
+
+    -- Insert the voter into the 'voter' table
+    INSERT INTO voter (
+        username, password_hash, age, cnic, first_name, 
+        last_name, gender, co_id, reg_date
+    ) 
+    VALUES (
+        p_username, v_hashed_password, p_age, p_cnic, p_first_name, 
+        p_last_name, p_gender, v_constituency_id, NOW()
+    );
+END //
+
+DELIMITER ;

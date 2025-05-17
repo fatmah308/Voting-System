@@ -1,0 +1,41 @@
+DELIMITER //
+
+CREATE PROCEDURE insert_candidate(
+    IN f_name VARCHAR(20),
+    IN l_name VARCHAR(20),
+    IN cnic VARCHAR(20),
+    IN age INT,
+    IN const VARCHAR(7),
+    IN pp VARCHAR(50),
+    IN qualification VARCHAR(15),
+    IN user_name VARCHAR(50),
+    IN password VARCHAR(50),
+    IN menifesto VARCHAR(30),
+    IN gender CHAR(1)
+)
+BEGIN
+    DECLARE p_id INT;
+    DECLARE c_id INT;
+
+    -- Get political party ID
+    SELECT par_id INTO p_id 
+    FROM politicalparty 
+    WHERE p_name = pp;
+
+    -- Get constituency ID
+    SELECT co_id INTO c_id 
+    FROM constituency 
+    WHERE co_num = const;
+
+    -- Insert candidate with hashed password
+    INSERT INTO candidate (
+        first_name, last_name, cnic, age, co_id, par_id, 
+        qualification, username, password_hash, menifesto, gender
+    ) 
+    VALUES (
+        f_name, l_name, cnic, age, c_id, p_id, 
+        qualification, user_name, SHA2(password, 256), menifesto, gender
+    );
+END //
+
+DELIMITER ;

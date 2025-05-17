@@ -1,0 +1,30 @@
+DELIMITER //
+
+CREATE PROCEDURE remove_candidate(
+    IN user_name VARCHAR(50),
+    IN password VARCHAR(20)
+)
+BEGIN
+    DECLARE hashed_password VARCHAR(256);
+    DECLARE original_password VARCHAR(256);
+
+    -- Check if the user exists
+    IF NOT EXISTS (SELECT 1 FROM candidate WHERE username = user_name) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'User does not exist';
+    ELSE
+        -- Retrieve the stored password hash
+        SELECT password_hash INTO original_password FROM candidate WHERE username = user_name;
+
+        -- Hash the entered password and compare it
+        SET hashed_password = SHA2(password, 256);
+
+        IF original_password != hashed_password THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Incorrect password';
+        ELSE
+            -- Delete the candidate record
+            DELETE FROM candidate WHERE username = user_name;
+        END IF;
+    END IF;
+END //
+
+DELIMITER ;
